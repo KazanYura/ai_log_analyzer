@@ -137,7 +137,3 @@ Currently supported:
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
-
-## License
-
-This project is available under the MIT License.
