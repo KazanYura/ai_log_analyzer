@@ -1,0 +1,8 @@
+import os
+
+PARSER_SERVICE_URL = os.getenv("PARSER_SERVICE_URL", "http://localhost:8001")
+AI_ANALYZER_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8000")
+
+PARSER_SERVICE_TIMEOUT = float(os.getenv("PARSER_SERVICE_TIMEOUT", "30"))
+AI_ANALYZER_SERVICE_TIMEOUT = float(os.getenv("AI_ANALYZER_SERVICE_TIMEOUT", "300")) 
+HEALTH_CHECK_TIMEOUT = float(os.getenv("HEALTH_CHECK_TIMEOUT", "5"))

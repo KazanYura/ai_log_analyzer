@@ -1,0 +1,75 @@
+version: '3.8'
+
+networks:
+  ai-analyser-network:
+    driver: bridge
+
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile.workspace
+    volumes:
+      - ..:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ai-analyser-network
+    command: sleep infinity
+    environment:
+      - AI_SERVICE_URL=http://ai-service:8000
+      - PARSER_SERVICE_URL=http://parser-service:8001
+    depends_on:
+      - ai-service
+      - parser-service
+
+  ai-service:
+    build:
+      context: ../ai_analyser_service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - ai-analyser-network
+    environment:
+      - PYTHONPATH=/app/src
+    volumes:
+      - ../ai_analyser_service:/app:cached
+    working_dir: /app
+
+  parser-service:
+    build:
+      context: ../parser_service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - ai-analyser-network
+    environment:
+      - PYTHONPATH=/app/src
+    volumes:
+      - ../parser_service:/app:cached
+    working_dir: /app
+
+  orchestrator-service:
+    build:
+      context: ../orchestrator_service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    networks:
+      - ai-analyser-network
+    depends_on:
+      - parser-service
+      - ai-service
+    environment:
+      - AI_SERVICE_URL=http://ai-service:8000
+      - PARSER_SERVICE_URL=http://parser-service:8001
+      - PYTHONPATH=/app/src
+    volumes:
+      - ../orchestrator_service:/app:cached
+    working_dir: /app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
